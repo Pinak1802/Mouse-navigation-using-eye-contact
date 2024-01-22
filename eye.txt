@@ -1,0 +1,39 @@
+import cv2
+import mediapipe as mp
+import pyautogui
+cam=cv2.VideoCapture(0)
+face_mesh=mp.solutions.face_mesh.FaceMesh()#The MediaPipe Face Landmarker task lets you detect face landmarks and facial expressions in images and videos
+screen_w,screen_h = pyautogui.size()
+while True:
+	_,frame=cam.read()
+	frame=cv2.flip(frame,1)#vertical flip
+	rgb_frame=cv2.cvtColor(frame,cv2.COLOR_BGR2RGB)
+	output=face_mesh.process(rgb_frame)
+	landmark_points=output.multi_face_landmarks
+	frame_h,frame_w,_= frame.shape()
+	if landmark_points:
+		landmarks=landmark_points[0].landmark
+		for id,landmark in enumerate(landmarks[474:478]):#only for one eye(left)
+			x=int(landmark.x * frame_w)
+			y=int(landmark.y * frame_h)
+			cv2.circle(frame,(x,y),3,(0,255,0))
+			if id == 1:
+				screeen_x=screen_w/frame_w*x         #fitting the screen by programme popup screen
+				screeen_y=screen_h/frame_h*y
+				pyautogui.moveTo(screen_x, screen_y)
+		left=[landmarks[145], landmarks[159]]
+		for landmark in landmarks:
+			x=int(landmark.x * frame_w)
+			y=int(landmark.y * frame_h)
+			cv2.circle(frame,(x,y),3,(0,255,255))	
+		if (left[0].y - left[1].y) < 0.004:
+			pyautogui.click()
+			pyautogui.sleep(1)
+	cv2.imshow('Eye controlled mouse',frame)
+cv2.waitkey(1)
+	
+MEDIAPIPE:MediaPipe is an open-source framework for building pipelines to perform computer vision inference over arbitrary sensory data such as video or audio
+
+Framewok:frameworks automate the implementation of several tasks and give developers a structure for application development
+
+Autogui:PyAutoGUI lets your Python scripts control the mouse and keyboard to automate interactions with other applications
